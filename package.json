@@ -1,5 +1,26 @@
 {
-  "dependencies": {
-    "puppeteer": "^19.11.0"
-  }
+    "name": "data-minning_tiktok",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "let's see who scrapable tiktok really is",
+    "main": "src/main.js",
+    "scripts": {
+        "start": "node src/main.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "tiktok",
+        "scraping",
+        "data",
+        "mining"
+    ],
+    "author": "Goran Topic",
+    "license": "ISC",
+    "dependencies": {
+        "files-js": "^1.0.1",
+        "playwright": "^1.32.3",
+        "playwright-extra": "^4.3.6",
+        "prompt-sync": "^4.2.0",
+        "puppeteer-extra-plugin-stealth": "^2.11.2"
+    }
 }

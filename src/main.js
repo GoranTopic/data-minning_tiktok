@@ -1,30 +1,37 @@
-import puppeteer from 'puppeteer';
+import { firefox } from 'playwright-extra';
+import prompt_sync from 'prompt-sync';
+//import extra_stealth from 'puppeteer-extra-plugin-stealth'
+import { setRoutes } from './routes.js'; 
+// create a prompt
+let prompt = prompt_sync();
+// add stealth plugin and use defaults (all evasion techniques)
+//firefox.use(extra_stealth())
 
-(async () => {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+// domain
+let domain = 'https://www.tiktok.com/';
 
-  await page.goto('https://developer.chrome.com/');
+// browser
+const browser = await firefox.launch({
+    headless: false,
+    // open devtools
+    devtools: true,
+});
 
-  // Set screen size
-  await page.setViewport({width: 1080, height: 1024});
+// set the headers
+let setHeaders = async page =>
+    await page.setExtraHTTPHeaders({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9'
+    });
 
-  // Type into search box
-  await page.type('.search-box__input', 'automate beyond recorder');
+// create a new page
+const page = await browser.newPage();
+// set the headers
+await setHeaders(page);
+// set routes
+await setRoutes(page);
+// go to the domain
+await page.goto(domain);
+// wait for the page to load
+await page.waitForLoadState('networkidle');
 
-  // Wait and click on first result
-  const searchResultSelector = '.search-box__link';
-  await page.waitForSelector(searchResultSelector);
-  await page.click(searchResultSelector);
-
-  // Locate the full title with a unique string
-  const textSelector = await page.waitForSelector(
-    'text/Customize and automate'
-  );
-  const fullTitle = await textSelector.evaluate(el => el.textContent);
-
-  // Print the full title
-  console.log('The title of this blog post is "%s".', fullTitle);
-
-  await browser.close();
-})();
