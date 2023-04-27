@@ -29,9 +29,9 @@ const page = await browser.newPage();
 // set the headers
 await setHeaders(page);
 // set routes
-await setRoutes(page);
+//await setRoutes(page);
 // go to the domain
 await page.goto(domain);
 // wait for the page to load
-await page.waitForLoadState('networkidle');
+await page.waitForLoadState('networkidle', { timeout: 1000 * 60 * 5 });
 

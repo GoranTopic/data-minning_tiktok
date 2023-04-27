@@ -60,30 +60,36 @@ const saveVideo = async route => {
     let contentType = headers['content-type'];
     let request_id = headers['x-storagegw-request-id'];
 
-    console.log('contentType: ', contentType);
+    //console.log('contentType: ', contentType);
     if( contentType === 'video/mp4'){
+        console.log('contentType: ', contentType);
         //console.log('resposne: ', response);
         // get the video
-        const video = await response.body();
+        let video = await response.body();
         // decode the video
-        const video_decoded = video.toString('base64');
+        video = Buffer.from(video, 'base64');
         // save the video
-        write_binstr(video_decoded, `./storage/videos/${request_id}.mp4`);
-
+        write_binstr(video, `./storage/videos/${request_id}.mp4`);
+        console.log('\n');
     }else if( contentType === 'application/json; charset=utf-8'){
+        console.log('contentType: ', contentType);
+        console.log('url: ', url);
         // get the json
-        const json = await response.json();
-        console.log('json: ', json);
-        // save the json
-        write_json(json, `./storage/json/${request_id}.json`);
-
+        try{
+            const json = await response.json();
+            console.log('json: ', json);
+            // save the json
+            write_json(json, `./storage/json/${request_id}.json`);
+            console.log('\n');
+        }catch(e){
+            //console.log('error: ', e);
+            //console.log('response: ', response);    
+        }
     } else if( contentType === 'image/jpeg'){
-
     } else if( contentType === 'application/javascript'){
 
     }
 
-    console.log('\n');
     
     await route.fulfill({ response });
     //await route.continue()
