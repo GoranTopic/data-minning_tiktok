@@ -162,7 +162,7 @@ const saveTraffic = async route => {
             await handleJs(route, response, url)
         }else if( contentType === 'text/html; charset=utf-8'){
             // save the html code through the url
-            await handleJs(route, response, url)
+            await handleHtml(route, response, url)
         }else
             console.error('content type not handled: ' + contentType);
     
