@@ -6,6 +6,8 @@
     "main": "src/main.js",
     "scripts": {
         "start": "node src/main.js",
+        "process": "node src/process_data/concatinate_videos.js",
+        "nuke-storage": "rm -rf ./storage/*",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
@@ -17,6 +19,7 @@
     "author": "Goran Topic",
     "license": "ISC",
     "dependencies": {
+        "cheerio": "^1.0.0-rc.12",
         "files-js": "^1.0.1",
         "playwright": "^1.32.3",
         "playwright-extra": "^4.3.6",
