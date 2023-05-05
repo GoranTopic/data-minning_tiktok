@@ -1,5 +1,6 @@
 import { write_json, read_json, file_not_exists, file_exists } from 'files-js';
 import get_request_id from '../../utils/get_request_id.js';
+import correlator from '../../correlator.js';
 import fs from 'fs';
 
 // if the directories do not exist, make them
@@ -21,24 +22,21 @@ const handleJson = async (route, response, url) => {
         response, 
         { by: 'x-tt-logid', path:'./storage/json/' }
     );
-    // if request id is undefined, throw error
-    if( !request_id ){
-        console.log('headers: ', headers);
-        throw new Error('request id is undefined');
-    }
     // if the url has api in it, save it
     if( url.includes('api') ){
         // add the url to the request id in the json table
         json_table[url] = request_id;
         // get the response
         const json = await response.json();
-        console.log('json: ', json);
+        // add the json to the correlator
+        correlator.add_json_posts(json);
         // save the json
         write_json(json, `./storage/json/${request_id}`);
         // save the json table
         write_json(json_table, './storage/json_table.json');
-        console.log(`saved ./storage/json/${request_id}`);
+        //console.log(`saved ./storage/json/${request_id}`);
     }
+}
     /*
     let video = [];
     //if we find video files
@@ -56,7 +54,6 @@ const handleJson = async (route, response, url) => {
             // 
         });
         */
-        }
 
 
 export default handleJson;

@@ -68,7 +68,7 @@ const fileSaver = async route => {
     // handle response based on content type
     if( contentType === 'video/mp4'){
         // save the video with by the request id
-        //await handleVideo(route, response, url);
+        await handleVideo(route, response, url);
     }else if( contentType === 'application/json' 
         || contentType === 'application/json; charset=utf-8'){
         // save the json by the request id

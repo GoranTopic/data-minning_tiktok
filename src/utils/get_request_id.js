@@ -1,4 +1,5 @@
 import { file_exists } from 'files-js';
+import { v4 as uuidv4 } from 'uuid';
     /* this function will return the request id from the response object
      * it takes as paramters the response object and a options object with the following properties:
      * by with the defaul value of 'x-tt-logid' and path with the default value of './storage/'
@@ -12,6 +13,8 @@ export default (response, options) => {
     const { by = 'x-tt-logid', path = './storage/' } = options;
     // get the request id from the response headers
     let headers = response.headers();
+    // get the url from the response object
+    const url = response.url();
     // request_id will be the value of the header with the name of by
     let request_id = undefined;
     if(by === 'x-tt-logid'){
@@ -21,10 +24,27 @@ export default (response, options) => {
     }else if(by === 'x-tt-request-id'){
         request_id = headers['x-tt-request-id']
     }else if(by === 'filename'){
-        // get the url from the response object
-        const url = response.url();
         // get the request filename from the url
         request_id = url.split('/').slice(-2)[0]
+    }else if(by === 'filename_with_timestamp'){
+        // get the request filename and add the current timestamp to it
+        request_id = url.split('/').slice(-2)[0] + '_' + Date.now()
+    }else if(by === 'filename_content-range'){
+        // ge the content range header
+        let range = headers['content-range']
+        if (range === undefined) range = headers['content-length']
+        if (range === undefined){
+            console.error('content-range header is undefined');
+            console.error('headers: ', headers);
+        }
+        // remove / from the range
+        range = range.replace(/\//g, '_')
+        // get the request filename and add the current timestamp to it
+        let filename = url.split('/').slice(-2)[0]
+        // add the filename with the content range to the request id
+        request_id = filename + '_' + range
+    }else if(by === 'uuid'){
+        request_id = uuidv4();
     }else{
         request_id = headers[by]
     }

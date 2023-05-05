@@ -1,5 +1,6 @@
 import { write_json, file_not_exists, read_json, file_exists } from 'files-js';
 import get_request_id from '../../utils/get_request_id.js';
+import correlator from '../../correlator.js';
 import fs from 'fs';
 /* this  file handle the html reponses */
 
@@ -25,24 +26,8 @@ const handleHtml = async (route, response, url) => {
     html_table[url] = request_id;
     // get the text
     let html_src = await response.text();
-    // get the json script from the html text
-    let script_json = html_src
-        .split('<script id="SIGI_STATE" type="application/json">')[1]
-        .split('</script>')[0];
-    if( !script_json ) return;
-    // parse json
-    let AppContext = JSON.parse(script_json);
-    // get the item ids
-    let ItemIds = Object.keys(AppContext.ItemModule);
-    // get the item modules
-    let itemModules = ItemIds.map(id => ({
-        author: AppContext.ItemModule[id].author,
-        description: AppContext.ItemModule[id].desc,
-        nickname: AppContext.ItemModule[id].nickname,
-        //.video.bitrateInfo[0].PlayAddr.UrlList
-        //.map( url => url.split('/').slice(-2)[0] )
-    }))
-    console.log(itemModules);
+    // add the html to the correlator
+    correlator.add_html_posts(html_src);
     // save the html code
     fs.writeFileSync(`./storage/html/${request_id}`, html_src);
     // save the html table

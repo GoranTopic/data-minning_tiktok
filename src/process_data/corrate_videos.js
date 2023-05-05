@@ -1,4 +1,8 @@
 /* 
+ * this script will read a html file from the storage/html folder
+ * and it will read the json files from the storage/json folder
+ * and it will parse the data.  it will look for the items list that
+ * hopefully will correlate video data from the collected request 
  */
 
 // import files-js
@@ -69,7 +73,8 @@ let posts = Object.keys(items).map( key => {
     }
 })
 
-console.log( posts.map( p => p.video.bitrateUrls) )
+//console.log(posts.map(post => post.video))
+
 
 
 // switch the store videos table keys and values
@@ -95,8 +100,6 @@ let stored_videos = Object.keys(video_table)
     }) )
 
 
-
-/*
 // now lets compare the posts with the stored videos
 posts = posts.map(post => { // for each post
     // for each stored video
@@ -109,10 +112,8 @@ posts = posts.map(post => { // for each post
         }
     }
 })
-posts.forEach(post => 
-    console.log(post.files.playAddr, post.files.downloadAddr, post.files.bitrateUrls)
-)
-*/
+
+posts.forEach(post => console.log(post.files.playAddr, post.files.downloadAddr, post.files.bitrateUrls))
 
 
 //let urlIds = stored_ids.map(url => url.filename)
