@@ -1,4 +1,5 @@
 import { write_json, write_binary, read_json, file_not_exists, file_exists } from 'files-js';
+import correlator from '../../correlation/correlator.js';
 import fs from 'fs';
 
 // if the directories do not exist, make them

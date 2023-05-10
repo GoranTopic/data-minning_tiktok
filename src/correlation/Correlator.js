@@ -1,16 +1,25 @@
 import { decode_url } from './utils/url_encoders.js'
-// make a class that keeps track of the correlation betweenthe post intecepted and the 
-// called corraltor, ti has an empty constructor and a method that takes in and html string 
+import 
+// make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
+// it takes in the request from the traffic, and it takes a response
+// called corraltor, it has an empty constructor.
 // json strings and video url strings 
-// every time it draes relationships between them and ouput the map of the relationships
+// every time it draws relationships between them and ouput the map of the relationships
+//
 class Correlator {
     constructor() {
+        this.authos = []
         this.posts = []
+        this.images = []
+        this.videos = []
     }
-
-    // add html
-    add_html_posts(html) {
-        // parse the html file with cheerp
+    // html handlers
+    html(request, responce) {
+        // this function takes a reques html and the respopnce
+        // it parses the html and it looks for the AppContext script where there is jsons 
+        // file that has the 9 first post data 
+        // it parses the data and create Author, Post, Image, Video objects
+        // it keeptrack of them in the internal list
         let html_posts = []
         let script_json = html
             .split('<script id="SIGI_STATE" type="application/json">')[1]
@@ -29,9 +38,9 @@ class Correlator {
         console.log(`html posts added: ${html_posts.length}`)
         console.log(`total posts: ${this.posts.length}`)
     }
-
-    // add json
-    add_json_posts(json) {
+    // json handlers
+    json(request, response) {
+        // get json
         // if json does not have itemList, dont save it
         let new_json_posts = []
         // check if the json has an itemList array
@@ -44,10 +53,16 @@ class Correlator {
         new_json_posts.forEach( post => this.posts.push(post) )
         console.log(`json posts added: ${new_json_posts.length}`)
         console.log(`total posts added: ${this.posts.length}`)
-    }
 
-    // add video file 
-    add_video_file(video_url, filename, video_buffer) {
+    }
+    // js handlers
+    js(request, response) {
+    }
+    // image handlers
+    image(request, response) {
+    }
+    // video handlers
+    video(request, response) {
         // remove the cache from the video url
         let video_url_raw = video_url;
         video_url = video_url.split('&__vid=TT-vCache')[0]
@@ -88,6 +103,17 @@ class Correlator {
         }
     }
 
+    }   
+}
+    // add json
+    add_json_posts(json) {
+            }
+
+    correalte_video(video_url, video) {
+
+    // add video file 
+    add_video_file() {
+        
     // _parse a video to standad from
     _parse_post(post) {
         // this funtion takes a post which may not be structured as the same 

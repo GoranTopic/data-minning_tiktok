@@ -1,6 +1,6 @@
 import { write_json, file_not_exists, read_json, file_exists } from 'files-js';
 import get_request_id from '../../utils/get_request_id.js';
-import correlator from '../../correlator.js';
+import correlator from '../../correlation/correlator.js';
 import fs from 'fs';
 /* this  file handle the html reponses */
 

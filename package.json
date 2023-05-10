@@ -8,6 +8,7 @@
         "start": "node src/main.js",
         "process": "node src/process_data/concatinate_videos.js",
         "nuke-storage": "rm -rf ./storage/*",
+        "test-storage": "node ./src/test_storage.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
@@ -20,6 +21,7 @@
     "license": "ISC",
     "dependencies": {
         "cheerio": "^1.0.0-rc.12",
+        "crawlee": "^3.3.1",
         "files-js": "^1.0.1",
         "playwright": "^1.32.3",
         "playwright-extra": "^4.3.6",
