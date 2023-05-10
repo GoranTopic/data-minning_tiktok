@@ -1,54 +1,42 @@
 //import fs from 'fs';
-import getRequestContentType from '../handlers/requests/getRequestContentType.js'
-//import getResponseContentType from '../handlers/response/getContentType.js';
-//import handleHtml from './handlers/handleHtml.js';
-//import handleVideo from './handlers/handleVideo.js';
-//import handleImage from './handlers/handleImage.js';
-//import handleJs from './handlers/handleJs.js';
-//import handleJson from './handlers/handleJson.js';
-
+import getResourceType from '../handlers/requests/getResourceType.js';
+import getContentType from '../handlers/responses/getContentType.js';
+import correlator from '../correlation/Correlator.js';
+// correlate based on content type
+let correlatorHandler = {
+    'application/json': correlator.json,
+    'application/json; charset=utf-8': correlator.json,
+    'video/mp4': correlator.video,
+    'image/jpeg': correlator.image,
+    'application/javascript': correlator.js,
+    'application/javascript charset=UTF-8': correlator.js,
+    'text/html': correlator.html,
+    'text/html; charset=utf-8': correlator.html,
+}
 
 // this rout takes an traffic, and sepate it the contenct type, 
 // it then makes the request and get the response,
 // the accodingly send it to the correlator
 const correlate = async route => {
-    // get the videos
-    let request = route.request()
-    //  
-    let requestContentType = getRequestContentType(request);
     // get the url
     //let url = route.request().url();
+    // get the videos
+    let request = route.request()
+    // get the resource type
+    let resourceType = getResourceType(request);
     // get the response
     let response = await route.fetch()
-    //  get the headers
-    /*
-    let headers = response.headers();
     // get the content type
-    let contentType = headers['content-type'];
+    let contentType = getContentType(response);
+    // correlate based on content type
+    if (correlatorHandler[contentType]) 
+        await correlatorHandler[contentType](request, response)
+    else
+        console.error('no correlator for ' + contentType)
+    console.log(resourceType + '->')
+    console.log( '<-' + contentType)
+    console.log()
     // handle response based on content type
-    if( contentType === 'video/mp4'){
-        let request_headers = route.request().headers();
-        console.log(request_headers);
-        // save the video with by the request id
-        await handleVideo(route, response, url);
-    }else if( contentType === 'application/json' 
-        || contentType === 'application/json; charset=utf-8'){
-        // save the json by the request id
-        await handleJson(route, response, url);
-    }else if( contentType === 'image/jpeg'){
-        // save the image through the url
-        //await handleImage(route, response, url)
-    }else if( contentType === 'application/javascript' 
-        || contentType === 'application/javascript charset=UTF-8'){
-        // save the js code through the url
-        //await handleJs(route, response, url)
-    }else if( contentType === 'text/html; charset=utf-8'){
-        // save the html code through the url
-        await handleHtml(route, response, url)
-    }else{
-        //console.error('content type not handled: ' + contentType);
-    }
-    */
     // continue with the request, to edit request headers use 
     await route.fulfill({ response })
 }

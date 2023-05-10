@@ -1,11 +1,9 @@
-import { decode_url } from './utils/url_encoders.js'
-import 
+import { decode_url } from '../utils/url_encoders.js'
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
 // called corraltor, it has an empty constructor.
 // json strings and video url strings 
 // every time it draws relationships between them and ouput the map of the relationships
-//
 class Correlator {
     constructor() {
         this.authos = []
@@ -53,7 +51,6 @@ class Correlator {
         new_json_posts.forEach( post => this.posts.push(post) )
         console.log(`json posts added: ${new_json_posts.length}`)
         console.log(`total posts added: ${this.posts.length}`)
-
     }
     // js handlers
     js(request, response) {
@@ -102,22 +99,9 @@ class Correlator {
             //console.log(`${selected_post.files.video.size}/${selected_post.video.size}`)
         }
     }
-
-    }   
-}
-    // add json
-    add_json_posts(json) {
-            }
-
-    correalte_video(video_url, video) {
-
-    // add video file 
-    add_video_file() {
-        
-    // _parse a video to standad from
+    // this funtion takes a post which may not be structured as the same 
+    // and return a post with the same structure
     _parse_post(post) {
-        // this funtion takes a post which may not be structured as the same 
-        // and return a post with the same structure
         return {
             author: { 
                 author: post.author?.uniqueId ? post.author.uniqueId : post.author,
@@ -143,20 +127,9 @@ class Correlator {
         }
     }
 
-    // return video 
-    get_videos() {
-        return this.videos;
-    }
-
-    // return posts
-    get_posts() {
-        return this.posts;
-    }
-
 }
 
 // make and instance of the correlator
-const correlator = new Correlator()
-
+const correlator = new Correlator();
 
 export default correlator

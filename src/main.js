@@ -13,7 +13,7 @@ let domain = 'https://www.tiktok.com/';
 
 // browser
 const browser = await firefox.launch({
-    headless: false,
+    headless: true,
     // open devtools
     devtools: true,
 });
