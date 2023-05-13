@@ -1,4 +1,6 @@
 import { decode_url } from '../utils/url_encoders.js'
+import 
+
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
 // called corraltor, it has an empty constructor.
@@ -19,9 +21,7 @@ class Correlator {
         // it parses the data and create Author, Post, Image, Video objects
         // it keeptrack of them in the internal list
         let html_posts = []
-        let script_json = html
-            .split('<script id="SIGI_STATE" type="application/json">')[1]
-            .split('</script>')[0]
+        
         // parse jsons
         let AppContext = JSON.parse( script_json )
         // get he items Modules from the AppContext

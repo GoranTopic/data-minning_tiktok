@@ -2,6 +2,7 @@
 import getResourceType from '../handlers/requests/getResourceType.js';
 import getContentType from '../handlers/responses/getContentType.js';
 import correlator from '../correlation/Correlator.js';
+
 // correlate based on content type
 let correlatorHandler = {
     'application/json': correlator.json,
@@ -30,14 +31,10 @@ const correlate = async route => {
     let contentType = getContentType(response);
     // correlate based on content type
     if (correlatorHandler[contentType]) 
-        await correlatorHandler[contentType](request, response)
-    else
-        console.error('no correlator for ' + contentType)
-    console.log(resourceType + '->')
-    console.log( '<-' + contentType)
-    console.log()
-    // handle response based on content type
-    // continue with the request, to edit request headers use 
+        correlatorHandler[contentType](request, response)
+    //else 
+    //  console.error('no correlator for ' + contentType)
+    // continue with the request
     await route.fulfill({ response })
 }
 
