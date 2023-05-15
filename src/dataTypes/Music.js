@@ -7,3 +7,5 @@ class Music {
         this.author = author;
     }
 }
+
+export default Music;

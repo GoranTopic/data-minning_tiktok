@@ -1,5 +1,14 @@
 import { decode_url } from '../utils/url_encoders.js'
-import 
+import { KeyValueStore } from 'crawlee';
+import Author from '../dataTypes/Author.js'
+import Post from '../dataTypes/Post.js'
+import Image from '../dataTypes/Image.js'
+import { Video, BlobVideo } from '../dataTypes/Video.js'
+import Challenge from '../dataTypes/Challenge.js'
+import Comment from '../dataTypes/Comment.js'
+import Music from '../dataTypes/Music.js'
+import Place from '../dataTypes/Place.js'
+
 
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
@@ -8,35 +17,161 @@ import
 // every time it draws relationships between them and ouput the map of the relationships
 class Correlator {
     constructor() {
-        this.authos = []
-        this.posts = []
-        this.images = []
-        this.videos = []
+        (async () =>{
+            this.authors = await KeyValueStore.open('authors');
+            this.posts = await KeyValueStore.open('posts');
+            this.images = await KeyValueStore.open('images');
+            this.videos = await KeyValueStore.open('videos');
+            this.blob_videos = await KeyValueStore.open('blob_videos');
+            this.challenges = await KeyValueStore.open('challenges');
+            this.comments = await KeyValueStore.open('comments');
+            this.musics = await KeyValueStore.open('musics');
+            this.places = await KeyValueStore.open('places');
+        })();
+        // this is an obje to expect
+        this.binariesToExpect = {};
     }
-    // html handlers
-    html(request, responce) {
-        // this function takes a reques html and the respopnce
-        // it parses the html and it looks for the AppContext script where there is jsons 
-        // file that has the 9 first post data 
-        // it parses the data and create Author, Post, Image, Video objects
-        // it keeptrack of them in the internal list
-        let html_posts = []
-        
-        // parse jsons
-        let AppContext = JSON.parse( script_json )
-        // get he items Modules from the AppContext
-        // get all the keys from the AppContext.ItemModule
-        Object.keys(AppContext.ItemModule) 
-            .forEach( key => // add the item to the items object
-                html_posts.push( this._parse_post(AppContext.ItemModule[key]) )
-            )
-        // add them to the global posts
-        html_posts.forEach( post => this.posts.push(post) )
-        // print he number of html posts gotten
-        console.log(`html posts added: ${html_posts.length}`)
-        console.log(`total posts: ${this.posts.length}`)
+    /* 
+     * this function takes the author, post, image, video, blob_video, comment, music
+     * and tries to correalte between them and previous ones
+     * @param {Array} Authos - list of author objects
+     * @param {Array} Posts - list of post objects
+     * @param {Array} Images - list of image objects
+     * @param {Array} Videos - list of video objects
+     * @param {Array} BlobVideos - list of blob video objects
+     * @param {Array} Comments - list of comment objects
+     * @param {Array} Music - list of music objects
+     * @return {void} - nothing
+     */
+    add_data = async data => {
+        // get paramters from the passed data
+        let { authors, posts, challenges, images, videos, blob_videos, comments, music, places, type } = data;
+        if(type){ // if a type is tag is passed, then add the data to the correlator
+            switch(type){
+                case 'author':
+                    await this.addAuthor( data )
+                    break;
+                case 'post':
+                    await this.addPost( data )
+                    break;
+                case 'challenge':
+                    await this.addChallenge( data )
+                    break;
+                case 'image':
+                    await this.addImage( data )
+                    break;
+                case 'video':
+                    await this.addVideo( data )
+                    break;
+                case 'blob_video':
+                    await this.addBlobVideo( data )
+                    break;
+                case 'comment':
+                    await this.addComment( data )
+                    break;
+                case 'music':
+                    await this.addMusic( data )
+                    break;
+                case 'place':
+                    await this.addPlace( data )
+                    break;
+                default:
+                    console.error(`unknown type ${type}`)
+            }
+        }else{
+            // console.log(`adding data to correlator`)
+            if(authors)     for(let author of authors)        await this.addAuthor(author)
+            if(posts)       for(let post of posts)            await this.addPost(post)
+            if(challenges)  for(let challenge of challenges)  await this.addChallenge(challenge)
+            if(videos)      for(let video of videos)          await this.addVideo(video)
+        }
     }
-    // json handlers
+    // add author 
+    addAuthor = async author => {
+        console.log(`adding author ${author.id}`)
+        // if author already exists, update it
+        let a = await this._checkIDAndUpdate( this.authors, author, Author )
+        // save the author
+        await this.authors.setValue( a.id, a.toObj() )
+    }
+    // add post and correlate
+    addPost = async post => {
+        console.log(`adding post ${post.id}`)
+        // if post already exists, update it
+        let p = await this._checkIDAndUpdate( this.posts, post, Post )
+        // save the post
+        await this.posts.setValue( p.id, p.toObj() )
+    }
+    // add image and correlate
+    addImage = async image => {
+        await this.images.setValue( image.id, image )
+    }
+    // add video and correalte
+    addVideo = async video => {
+        console.log(`adding video ${video.id}`)
+        // make a video object
+        let v = new Video( video )
+        // add url to expected binary data
+        this.binariesToExpect[v.url] = v
+        // if video already exists, update it
+        v = await this._checkIDAndUpdate( this.videos, video, Video )
+        // save the video
+        await this.videos.setValue( video.id, video )
+
+    }
+    // correlate video with binary data
+    addBlobVideo = async blob_video => {
+        //console.log(`correlating blob_video ${blob_video.url}`)
+        // make a blob video object
+        if( this.binariesToExpect[blob_video.url] ){
+            let video = this.binariesToExpect[blob_video.url]
+            // let make blob obj 
+            let blob = new BlobVideo({
+                blob: blob_video.video, 
+                start: blob_video.range.start,
+                end: blob_video.range.end,
+                length: blob_video.range.length,
+                url: blob_video.url })
+            video.addBlob( blob )
+            console.log('blob video correlated to:', video.id)
+        }else{
+            console.error('blob video could not be correlated')
+        }
+    }
+    addComment = async comment => {
+    }
+    addMusic = async music => {
+        await this.musics.setValue( music.id, music )
+    }
+    addChallenge = async challenge => {
+        console.log(`adding challenge ${challenge.id}`)
+        // if challenge already exists, update it
+        let c = await this._checkIDAndUpdate( this.challenges, challenge, Challenge )
+        // save the challenge
+        await this.challenges.setValue( challenge.id, challenge )
+    }
+    addPlace = async place => {
+    }
+    /* @param {Object} database - the dataset to check the id against, this can be this.authors... etc
+     * @param {Object} data - the data to check the id against
+     * @param {Class} Class - the class to create if the id does not exist
+     * @return {Object} - the object that was created or updated based on the passed class
+     */
+    _checkIDAndUpdate = async (database, data , Class) => {
+        let d;
+        let id = data.id;
+        // if author already exists, update it
+        let previous_record = await database.getValue( id );
+        if( previous_record ){
+            d = new Class( previous_record )
+            console.log('updating previous_record, ', previous_record.id + ' with ' + data.id);
+            d.update( data )
+        }else // else create a new author
+            d = new Class( data )
+        return d;
+    }
+    /*
+        // html handlers
     json(request, response) {
         // get json
         // if json does not have itemList, dont save it
@@ -52,55 +187,18 @@ class Correlator {
         console.log(`json posts added: ${new_json_posts.length}`)
         console.log(`total posts added: ${this.posts.length}`)
     }
-    // js handlers
+// js handlers
     js(request, response) {
     }
-    // image handlers
+// image handlers
     image(request, response) {
     }
-    // video handlers
+// video handlers
     video(request, response) {
         // remove the cache from the video url
-        let video_url_raw = video_url;
-        video_url = video_url.split('&__vid=TT-vCache')[0]
-        let correlated = false;
-        let selected_post = null;
-        // for every post in the video url
-        this.posts.forEach( post => {
-            // make a video files that will hold the video files
-            if(post.video.playAddr === video_url){
-                post.files.video['playAddr'] = filename;
-                selected_post = post
-                correlated = true;
             }
-            // add the video files to the post
-            if(post.video.downloadAddr === video_url){
-                post.files.video['downloadAddr'] = filename;
-                selected_post = post
-                correlated = true;
-            }
-            // add the video files to the post
-            post.files.video['bitrateUrls'] = 
-                post.video.bitrateUrls.map(url => {
-                    if(url === video_url){
-                        selected_post = post
-                        correlated = true;
-                        return filename
-                    } 
-                });
-        });
-        // add the video files to the post
-        if(correlated === false)
-            console.log(`could not correlate video file ${filename} to any post`)
-        else{
-            console.log(`correlated video ${filename} to post by ${selected_post.author.author}`)
-            //selected_post.files.video.size += buffer_size;
-            // print the size od the video
-            //console.log(`${selected_post.files.video.size}/${selected_post.video.size}`)
-        }
-    }
-    // this funtion takes a post which may not be structured as the same 
-    // and return a post with the same structure
+// this funtion takes a post which may not be structured as the same 
+// and return a post with the same structure
     _parse_post(post) {
         return {
             author: { 
@@ -126,6 +224,7 @@ class Correlator {
             },
         }
     }
+    */
 
 }
 

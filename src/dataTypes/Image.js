@@ -4,3 +4,5 @@ class Images {
         this.path = path;
     }
 }
+
+export default Images;

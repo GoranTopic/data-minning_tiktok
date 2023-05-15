@@ -7,3 +7,5 @@ class Comment {
         this.author = author;
     }
 }
+
+export default Comment
