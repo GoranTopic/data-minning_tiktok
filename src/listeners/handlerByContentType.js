@@ -52,18 +52,16 @@ let trafficHandlers = {
     }
 }
 
-// this rout takes an traffic, and sepate it the contenct type, 
-// it then makes the request and get the response,
-// the accodingly send it to the correlator
-const correlateTraffic = async route => {
+// function takes a response, it get the request and response
+// it takes the content type and calls the correpending parser
+// then it calls the correlator
+const handlerResponseByContentType = async response => {
     // get the url
     //let url = route.request().url();
     // get the videos
-    let request = await route.request()
+    let request = await response.request();
     // get the resource type
-    //let resourceType = getResourceType(request);
-    // get the response
-    let response = await route.fetch()
+    let resourceType = getResourceType(request);
     // get the content type
     let contentType = getContentType(response);
     // data to parse
@@ -88,8 +86,6 @@ const correlateTraffic = async route => {
     // if data is not an empty object
     if (Object.keys(data).length !== 0)
         await correlator.add_data(data)
-    // continue with the request
-    await route.fulfill({ response })
 }
 
-export default correlateTraffic;
+export default handlerResponseByContentType;
