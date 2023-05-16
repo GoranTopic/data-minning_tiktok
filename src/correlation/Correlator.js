@@ -1,4 +1,5 @@
 import { decode_url } from '../utils/url_encoders.js'
+import get_video_id_from_url from '../utils/get_video_id_from_url.js';
 import { KeyValueStore } from 'crawlee';
 import Author from '../dataTypes/Author.js'
 import Post from '../dataTypes/Post.js'
@@ -8,7 +9,6 @@ import Challenge from '../dataTypes/Challenge.js'
 import Comment from '../dataTypes/Comment.js'
 import Music from '../dataTypes/Music.js'
 import Place from '../dataTypes/Place.js'
-
 
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
@@ -75,6 +75,9 @@ class Correlator {
                 case 'place':
                     await this.addPlace( data )
                     break;
+                case 'error':
+                    //console.error(`error: ${data.error}`)
+                    break;
                 default:
                     console.error(`unknown type ${type}`)
             }
@@ -88,7 +91,7 @@ class Correlator {
     }
     // add author 
     addAuthor = async author => {
-        console.log(`adding author ${author.id}`)
+        //console.log(`adding author ${author.id}`)
         // if author already exists, update it
         let a = await this._checkIDAndUpdate( this.authors, author, Author )
         // save the author
@@ -96,7 +99,7 @@ class Correlator {
     }
     // add post and correlate
     addPost = async post => {
-        console.log(`adding post ${post.id}`)
+        //console.log(`adding post ${post.id}`)
         // if post already exists, update it
         let p = await this._checkIDAndUpdate( this.posts, post, Post )
         // save the post
@@ -108,23 +111,47 @@ class Correlator {
     }
     // add video and correalte
     addVideo = async video => {
-        console.log(`adding video ${video.id}`)
+        //console.log(`adding video ${video.id}`)
         // make a video object
+        //console.log('playAdress is:', get_video_id_from_url(video.playAddr))
+        //console.log('downloadAddress is:', get_video_id_from_url(video.downloadAddr))
+        // get all of the urls from the video 
+        let urls = this._findUrlsValues(video)
+
         let v = new Video( video )
         // add url to expected binary data
-        this.binariesToExpect[v.url] = v
+        urls.forEach( url => this.binariesToExpect[url.value] = { path: url.path, video: v })
+        // add the bitrate urlslist
+        /*v.data.bitrateInfo.forEach( bitrate => 
+            bitrate.PlayAddr.UrlList.forEach( url =>
+                this.binariesToExpect[url] = v
+            )
+        )*/
+
         // if video already exists, update it
         v = await this._checkIDAndUpdate( this.videos, video, Video )
         // save the video
         await this.videos.setValue( video.id, video )
-
+        /*
+        console.log('binaries to expect:', 
+            Object.keys(this.binariesToExpect)
+            .map( url => { 
+                let mapped = {};
+                let url_id = get_video_id_from_url(url);
+                let post = this.binariesToExpect[url].data.bitrateInfo[1];
+                mapped[url_id] = post
+                return { ...mapped }
+            })
+        )
+        */
     }
     // correlate video with binary data
     addBlobVideo = async blob_video => {
         //console.log(`correlating blob_video ${blob_video.url}`)
         // make a blob video object
         if( this.binariesToExpect[blob_video.url] ){
-            let video = this.binariesToExpect[blob_video.url]
+            let video = this.binariesToExpect[blob_video.url].video
+            let path = this.binariesToExpect[blob_video.url].path
             // let make blob obj 
             let blob = new BlobVideo({
                 blob: blob_video.video, 
@@ -133,9 +160,11 @@ class Correlator {
                 length: blob_video.range.length,
                 url: blob_video.url })
             video.addBlob( blob )
-            console.log('blob video correlated to:', video.id)
+            console.log(`path ${path} correlated`)
+            //console.log('blob video correlated to:', video.id)
         }else{
-            console.error('blob video could not be correlated')
+            let video_id = get_video_id_from_url(blob_video.url);
+            console.log(`blob video ${video_id} could not be correlated`)
         }
     }
     addComment = async comment => {
@@ -144,7 +173,7 @@ class Correlator {
         await this.musics.setValue( music.id, music )
     }
     addChallenge = async challenge => {
-        console.log(`adding challenge ${challenge.id}`)
+        //console.log(`adding challenge ${challenge.id}`)
         // if challenge already exists, update it
         let c = await this._checkIDAndUpdate( this.challenges, challenge, Challenge )
         // save the challenge
@@ -169,6 +198,20 @@ class Correlator {
         }else // else create a new author
             d = new Class( data )
         return d;
+    }
+
+    _findUrlsValues = (obj, path = '', results = []) => {
+        const urlRegexPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(:\d{2,5})?(\/\S*)?$/i;
+        for (let key in obj) {
+            const value = obj[key];
+            const newPath = path ? `${path}.${key}` : key;
+            if (typeof value === 'string' && urlRegexPattern.test(value)) {
+                results.push({ path: newPath, value });
+            } else if (typeof value === 'object') {
+                this._findUrlsValues(value, newPath, results); // Recursive call if the value is an object
+            }
+        }
+        return results;
     }
     /*
         // html handlers

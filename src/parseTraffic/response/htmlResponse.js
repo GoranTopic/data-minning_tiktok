@@ -48,6 +48,14 @@ const handleHtmlResponse = async response => {
             let video = post.video;
             // overwrite the video
             post.video = video.id;
+            // add the post id to the video
+            video.post = post.id;
+            // add the author name to the video
+            video.authorName = author.nickname;
+            // add the author id to the video
+            video.author = author.id;
+            // for debuggin purposes add the post obj to the video
+            video.postDesc = post.desc;
             // save the video
             videos.push(video);
             // get the music

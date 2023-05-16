@@ -2,7 +2,6 @@
 import { firefox } from 'playwright';
 import prompt_sync from 'prompt-sync';
 //import extra_stealth from 'puppeteer-extra-plugin-stealth'
-import setRoutes from './routes/setRoutes.js';
 import setListeners from './listeners/setListeners.js';
 // create a prompt
 let prompt = prompt_sync();

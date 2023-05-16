@@ -1,8 +1,13 @@
 // handle videos
 const handleVideoResponse = async response => {
     let parsed = {};
+    // wait for the response to finish
+    await response.finished();
     // get the video
+    let request = response.request();
+    // get the video Buffer
     let video = await response.body();
+    // get the video
     parsed['video'] = video;
     // let url
     //let url = response.url();
@@ -18,7 +23,7 @@ const handleVideoResponse = async response => {
         let length = headers['content-length'];
         parsed['range'] = { start, end, length };
         console.log(`response content-range: ${start}-${end}, length: ${length}`)
-    }video
+    }
     //else{=
     //    console.log('no content-range header in response')
     //    console.log(headers)
@@ -27,7 +32,7 @@ const handleVideoResponse = async response => {
         // get the content-length header
         let length = headers['content-length'];
         parsed['length'] = length;
-        console.log(`content-length: ${length}`)
+        //console.log(`content-length: ${length}`)
     }
     //else{
     //    console.log('no content-length header in response')

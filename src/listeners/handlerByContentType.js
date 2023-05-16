@@ -28,7 +28,7 @@ let trafficHandlers = {
     },
     'application/json': {
         request: null, //handleJsonRequest,
-        response: null, //handleJsonResponse
+        response: handleJsonResponse
     },
     'application/json; charset=utf-8': { 
         request: null, //handleJsonRequest,
@@ -65,7 +65,7 @@ const handlerResponseByContentType = async response => {
     // get the content type
     let contentType = getContentType(response);
     // data to parse
-    console.log('contentType', contentType)
+    //console.log('contentType', contentType)
     let data = {}
     // if there is a correlator for the content type
     if (trafficHandlers[contentType]){

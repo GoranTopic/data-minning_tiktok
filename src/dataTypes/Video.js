@@ -5,14 +5,25 @@ class Video extends DataType {
         super(video);
         // binary blob video to hold
         this.blobs = [];
-        // this is the url to the video
+        // chooses one of the urls
         this.url = this.data.playAddr ?? this.data.downloadAddr;
+        this.urls = [ this.data.playAddr, this.data.downloadAddr ];
+        // add then just tin case
+        this.playAddr = this.data.playAddr;
+        this.downloadAddr = this.data.downloadAddr;
         // the the lenght of the video
-        this.length = this.data.length
+        this.size = this.data.size;
     }
     addBlob(blob) {
         this.blobs.push(blob);
+        console.log('adding blob to video', this.data.postDesc, " from ", this.data.authorName);
+        console.log('start', blob.start, 'end', blob.end, 'length', blob.length);
+        console.log('video size: ', this.size);
+
         //console.log(this.blobs);
+    }
+    getPostId() {
+        return this.data.p
     }
 }
 
@@ -23,7 +34,6 @@ class BlobVideo {
         this.end = end;
         this.length = length;
         this.url = url;
-        console.log('start', start, 'end', end, 'length', length);
     }
 }
 
