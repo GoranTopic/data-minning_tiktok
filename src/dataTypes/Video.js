@@ -13,27 +13,30 @@ class Video extends DataType {
         this.downloadAddr = this.data.downloadAddr;
         // the the lenght of the video
         this.size = this.data.size;
+        // check if video is done with the blobs
+        this.isDone = false;
     }
     addBlob(blob) {
         this.blobs.push(blob);
         console.log('adding blob to video', this.data.postDesc, " from ", this.data.authorName);
-        console.log('start', blob.start, 'end', blob.end, 'length', blob.length);
         console.log('video size: ', this.size);
-
+        console.log('start', blob.start, 'end', blob.end, 'length', blob.length);
+        console.log('blob:', blob);
         //console.log(this.blobs);
     }
     getPostId() {
         return this.data.p
     }
+    isDone = () => this.isDone
 }
 
 class BlobVideo {
-    constructor({ blob, start, end, length, url }) {
-        this.blob = blob;
-        this.start = start;
-        this.end = end;
-        this.length = length;
-        this.url = url;
+    constructor(blob) {
+        this.blob = blob.video ?? null;
+        this.start = blob.range.start ?? null;
+        this.end = blob.range.end ?? null;
+        this.length = blob.range.length ?? null;
+        this.url = blob.url ?? null;
     }
 }
 

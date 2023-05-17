@@ -19,11 +19,11 @@ import correlator from '../correlation/Correlator.js';
 // correlate based on content type
 let trafficHandlers = {
     'text/html': {
-        request: handleHtmlRequest,
+        request: null,//handleHtmlRequest,
         response: handleHtmlResponse
     },
     'text/html; charset=utf-8': {
-        request: handleHtmlRequest,
+        request:  null, //handleHtmlRequest,
         response: handleHtmlResponse
     },
     'application/json': {
@@ -32,10 +32,10 @@ let trafficHandlers = {
     },
     'application/json; charset=utf-8': { 
         request: null, //handleJsonRequest,
-        response: null, //handleJsonResponse
+        response: handleJsonResponse
     },
     'video/mp4': {
-        request: handleVideoRequest,
+        request: null, //handleVideoRequest,
         response: handleVideoResponse
     },
     'image/jpeg': {

@@ -3,6 +3,8 @@ import { firefox } from 'playwright';
 import prompt_sync from 'prompt-sync';
 //import extra_stealth from 'puppeteer-extra-plugin-stealth'
 import setListeners from './listeners/setListeners.js';
+//import the correlator
+import correlator from './correlation/Correlator.js';
 // create a prompt
 let prompt = prompt_sync();
 // add stealth plugin and use defaults (all evasion techniques)
@@ -26,7 +28,7 @@ await setListeners(page);
 // go to the domain
 await page.goto(domain);
 // wait for the page to load
-//await page.waitForLoadState('networkidle', { timeout: 1000 * 60 * 60 * 5 });
+await page.waitForLoadState('networkidle', { timeout: 1000 * 60 * 60 * 5 });
 // scroll down
 //await page.mouse.wheel(0, 100);
 

@@ -17,20 +17,35 @@ import Place from '../dataTypes/Place.js'
 // every time it draws relationships between them and ouput the map of the relationships
 class Correlator {
     constructor() {
-        (async () =>{
-            this.authors = await KeyValueStore.open('authors');
-            this.posts = await KeyValueStore.open('posts');
-            this.images = await KeyValueStore.open('images');
-            this.videos = await KeyValueStore.open('videos');
-            this.blob_videos = await KeyValueStore.open('blob_videos');
-            this.challenges = await KeyValueStore.open('challenges');
-            this.comments = await KeyValueStore.open('comments');
-            this.musics = await KeyValueStore.open('musics');
-            this.places = await KeyValueStore.open('places');
+        (async () => {
+            this.dbs = { 
+                authors: await KeyValueStore.open('authors'),
+                posts: await KeyValueStore.open('posts'),
+                images: await KeyValueStore.open('images'),
+                videos: await KeyValueStore.open('videos'),
+                blob_videos: await KeyValueStore.open('blob_videos'),
+                challenges: await KeyValueStore.open('challenges'),
+                comments: await KeyValueStore.open('comments'),
+                musics: await KeyValueStore.open('musics'),
+                places: await KeyValueStore.open('places'),
+            }
         })();
+        // this is an array to hold the objects
+        this.arrays = {
+            authors: [],
+            posts: [],
+            images: [],
+            videos: [],
+            blob_videos: [],
+            challenges: [],
+            comments: [],
+            musics: [],
+            places: []
+        }
         // this is an obje to expect
         this.binariesToExpect = {};
     }
+
     /* 
      * this function takes the author, post, image, video, blob_video, comment, music
      * and tries to correalte between them and previous ones
@@ -83,55 +98,66 @@ class Correlator {
             }
         }else{
             // console.log(`adding data to correlator`)
-            if(authors)     for(let author of authors)        await this.addAuthor(author)
-            if(posts)       for(let post of posts)            await this.addPost(post)
-            if(challenges)  for(let challenge of challenges)  await this.addChallenge(challenge)
-            if(videos)      for(let video of videos)          await this.addVideo(video)
+            if(authors)
+                for(let author of authors)
+                    await this.addAuthor(author)
+            if(posts)
+                for(let post of posts)
+                    await this.addPost(post)
+            if(challenges)
+                for(let challenge of challenges)
+                    await this.addChallenge(challenge)
+            if(videos)
+                for(let video of videos)
+                    await this.addVideo(video)
         }
     }
+
     // add author 
-    addAuthor = async author => {
+    addAuthor = async author_data => {
         //console.log(`adding author ${author.id}`)
         // if author already exists, update it
-        let a = await this._checkIDAndUpdate( this.authors, author, Author )
+        let a = await this._checkIDAndUpdateData( 'authors', author_data, Author )
+        // add the binary urls to expect
+        //this._extractBinarysUrlsToExpect( a );
+        // add the the arrays
+        this.arrays['authors'].push( a )
         // save the author
-        await this.authors.setValue( a.id, a.toObj() )
+        await this.dbs['authors'].setValue( a.id, a.toObj() );
     }
+
     // add post and correlate
     addPost = async post => {
         //console.log(`adding post ${post.id}`)
         // if post already exists, update it
-        let p = await this._checkIDAndUpdate( this.posts, post, Post )
+        let p = await this._checkIDAndUpdateData( 'posts', post, Post )
+        // add the the internal array
+        this.arrays['posts'].push( p )
+        // add the binary urls to expect
+        //this._extractBinarysUrlsToExpect( p );
         // save the post
-        await this.posts.setValue( p.id, p.toObj() )
+        await this.dbs['posts'].setValue( p.id, p.toObj() )
     }
+
     // add image and correlate
-    addImage = async image => {
-        await this.images.setValue( image.id, image )
+    addImage = async image_data => {
+        // make an image object 
+        let i = new Image( image_data )
+        //await this.dbs['images'].setValue( image.id, image )
     }
+
     // add video and correalte
-    addVideo = async video => {
-        //console.log(`adding video ${video.id}`)
+    addVideo = async video_data => {
         // make a video object
-        //console.log('playAdress is:', get_video_id_from_url(video.playAddr))
-        //console.log('downloadAddress is:', get_video_id_from_url(video.downloadAddr))
+        let v = new Video( video_data )
         // get all of the urls from the video 
-        let urls = this._findUrlsValues(video)
-
-        let v = new Video( video )
-        // add url to expected binary data
-        urls.forEach( url => this.binariesToExpect[url.value] = { path: url.path, video: v })
-        // add the bitrate urlslist
-        /*v.data.bitrateInfo.forEach( bitrate => 
-            bitrate.PlayAddr.UrlList.forEach( url =>
-                this.binariesToExpect[url] = v
-            )
-        )*/
-
+        this._extractBinarysUrlsToExpect( v );   
+        // add the the internal array
+        this.arrays['videos'].push( v )
         // if video already exists, update it
-        v = await this._checkIDAndUpdate( this.videos, video, Video )
-        // save the video
-        await this.videos.setValue( video.id, video )
+        v = await this._checkIDAndUpdateData( 'videos', video_data, Video )
+        // save the video in the db
+        await this.dbs['videos'].setValue( v.id, v.toObj() )
         /*
         console.log('binaries to expect:', 
             Object.keys(this.binariesToExpect)
@@ -145,52 +171,66 @@ class Correlator {
         )
         */
     }
+
     // correlate video with binary data
-    addBlobVideo = async blob_video => {
-        //console.log(`correlating blob_video ${blob_video.url}`)
-        // make a blob video object
-        if( this.binariesToExpect[blob_video.url] ){
-            let video = this.binariesToExpect[blob_video.url].video
-            let path = this.binariesToExpect[blob_video.url].path
-            // let make blob obj 
-            let blob = new BlobVideo({
-                blob: blob_video.video, 
-                start: blob_video.range.start,
-                end: blob_video.range.end,
-                length: blob_video.range.length,
-                url: blob_video.url })
-            video.addBlob( blob )
-            console.log(`path ${path} correlated`)
-            //console.log('blob video correlated to:', video.id)
-        }else{
-            let video_id = get_video_id_from_url(blob_video.url);
+    addBlobVideo = async blob_video_data => {
+        // print this binaries to expect
+        let url = blob_video_data.url;
+        // check if it is correlated to a video
+        let video = this.binariesToExpect[url].dataObj;
+        if(video) // add make blob obj to the video
+            video.addBlob( new BlobVideo(blob_video_data) );
+        else{
+            let video_id = get_video_id_from_url(blob_video_data.url);
             console.log(`blob video ${video_id} could not be correlated`)
         }
     }
+
+    // add comment and correlate
     addComment = async comment => {
     }
+
+    // add music and correlate
     addMusic = async music => {
         await this.musics.setValue( music.id, music )
     }
+
     addChallenge = async challenge => {
         //console.log(`adding challenge ${challenge.id}`)
         // if challenge already exists, update it
-        let c = await this._checkIDAndUpdate( this.challenges, challenge, Challenge )
+        let c = await this._checkIDAndUpdateData( 'challenges', challenge, Challenge )
         // save the challenge
-        await this.challenges.setValue( challenge.id, challenge )
+        await this.dbs['challenges'].setValue( c.id, c.toObj() )
     }
+
+    //  add place and correlate
     addPlace = async place => {
     }
+
+    /* @param {string} arrayType - the type of array to get
+     *      @param {string} by - the key to check
+     *          @param {string} of - the value it must be equal to
+     *  @returns {Array} - the array of objects that match the query
+     *  @example corrlator.get('authors').by('id').of('1')
+     */
+    get = arrayType => ({
+        by: by => ({
+            of: of => this.arrays[arrayType].filter( obj => obj.data[by] === of )
+        })
+    })
+
+
     /* @param {Object} database - the dataset to check the id against, this can be this.authors... etc
      * @param {Object} data - the data to check the id against
      * @param {Class} Class - the class to create if the id does not exist
      * @return {Object} - the object that was created or updated based on the passed class
+     * check if the id exists in the database, if it does, update it, if not, create a new one
      */
-    _checkIDAndUpdate = async (database, data , Class) => {
+    _checkIDAndUpdateData = async (type, data , Class) => {
         let d;
         let id = data.id;
         // if author already exists, update it
-        let previous_record = await database.getValue( id );
+        let previous_record = await this.dbs[type].getValue( id );
         if( previous_record ){
             d = new Class( previous_record )
             console.log('updating previous_record, ', previous_record.id + ' with ' + data.id);
@@ -199,20 +239,35 @@ class Correlator {
             d = new Class( data )
         return d;
     }
-
-    _findUrlsValues = (obj, path = '', results = []) => {
-        const urlRegexPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(:\d{2,5})?(\/\S*)?$/i;
-        for (let key in obj) {
-            const value = obj[key];
-            const newPath = path ? `${path}.${key}` : key;
-            if (typeof value === 'string' && urlRegexPattern.test(value)) {
-                results.push({ path: newPath, value });
-            } else if (typeof value === 'object') {
-                this._findUrlsValues(value, newPath, results); // Recursive call if the value is an object
+    /* @param {Object} js obj 
+     * @return null
+     * get all of the urls from the video and add them to the expected binary data
+     */
+    _extractBinarysUrlsToExpect = dataObj => {
+        let data = dataObj.toObj();
+        /* this function takes an object and returns an array of all of the urls in the object */
+        let _findUrlsValues = (obj, path = '', results = []) => {
+            const urlRegexPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(:\d{2,5})?(\/\S*)?$/i;
+            for (let key in obj) {
+                const value = obj[key];
+                const newPath = path ? `${path}.${key}` : key;
+                if (typeof value === 'string' && urlRegexPattern.test(value)) {
+                    results.push({ path: newPath, value });
+                } else if (typeof value === 'object') {
+                    _findUrlsValues(value, newPath, results); // Recursive call if the value is an object
+                }
             }
+            return results;
         }
-        return results;
+        // add urls
+        let urls = _findUrlsValues(data);
+        // add url to expected binary data
+        urls.forEach( 
+            url => this.binariesToExpect[url.value] = { path: url.path, dataObj }
+        );
     }
+}
+
     /*
         // html handlers
     json(request, response) {
@@ -268,8 +323,6 @@ class Correlator {
         }
     }
     */
-
-}
 
 // make and instance of the correlator
 const correlator = new Correlator();
