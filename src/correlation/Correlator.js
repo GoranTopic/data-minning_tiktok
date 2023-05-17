@@ -1,14 +1,14 @@
 import { decode_url } from '../utils/url_encoders.js'
 import get_video_id_from_url from '../utils/get_video_id_from_url.js';
 import { KeyValueStore } from 'crawlee';
-import Author from '../dataTypes/Author.js'
-import Post from '../dataTypes/Post.js'
-import Image from '../dataTypes/Image.js'
-import { Video, BlobVideo } from '../dataTypes/Video.js'
-import Challenge from '../dataTypes/Challenge.js'
-import Comment from '../dataTypes/Comment.js'
-import Music from '../dataTypes/Music.js'
-import Place from '../dataTypes/Place.js'
+import Author from './dataTypes/Author.js'
+import Post from './dataTypes/Post.js'
+import Image from './dataTypes/Image.js'
+import { Video, BlobVideo } from './dataTypes/Video.js'
+import Challenge from './dataTypes/Challenge.js'
+import Comment from './dataTypes/Comment.js'
+import Music from './dataTypes/Music.js'
+import Place from './dataTypes/Place.js'
 
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
