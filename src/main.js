@@ -1,6 +1,8 @@
 //import { firefox } from 'playwright-extra';
 import { firefox } from 'playwright';
 import prompt_sync from 'prompt-sync';
+// import the scripts to follow
+import watch_memes from './scripts/watch_memes.js';
 //import extra_stealth from 'puppeteer-extra-plugin-stealth'
 import setListeners from './listeners/setListeners.js';
 // import the sript to handle
