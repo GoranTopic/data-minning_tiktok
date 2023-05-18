@@ -1,12 +1,14 @@
+import { v4 as uuidv4 } from 'uuid';
+
+
 class DataType {
     // create a data type with the given data
     constructor(data) {
         this.data = { ...data };
-        if (!this.data.id){
-            console.log( this.data.id );
-            throw new Error("DataType must have an id field");
-        }else 
+        if (this.data.id)
             this.id = this.data.id;
+        else 
+            this.id = uuidv4();
     }
     // update the data with the new data
     update(data) {

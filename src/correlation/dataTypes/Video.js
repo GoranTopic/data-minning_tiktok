@@ -1,4 +1,5 @@
 import DataType from "./DataType.js";
+import { v4 as uuidv4 } from 'uuid';
 
 class Video extends DataType {
     constructor(video) {
@@ -16,18 +17,48 @@ class Video extends DataType {
         // check if video is done with the blobs
         this.isDone = false;
     }
+
     addBlob(blob) {
         this.blobs.push(blob);
-        console.log('adding blob to video', this.data.postDesc, " from ", this.data.authorName);
-        console.log('video size: ', this.size);
-        console.log('start', blob.start, 'end', blob.end, 'length', blob.length);
-        console.log('blob:', blob);
-        //console.log(this.blobs);
+        //console.log('adding blob to video', this.data.postDesc, " from ", this.data.authorName);
+        //console.log('video size: ', this.size);
+        //console.log('start', blob.start, 'end', blob.end, 'length', blob.length);
+        // check that it is done
+        this.isDone = true;
+        // add the blobs together so that it make a choerent video
+        this._addBlobsTogether();
+        // return if the video is done
+        return this.isDone;
     }
-    getPostId() {
+
+    _addBlobsTogether() { // just the first one for now
+        // make the complete video
+        this.complete_video = this.blobs[0].blob;
+        // if creation was successful 
+        if (this.complete_video){
+            // make a unique uuid 
+            this.videoFileUUID = uuidv4();
+            // set video id to data
+            this.data.videoFile = this.videoFileUUID;
+        }
+    }
+
+    getBinary() { // returns the video
+        return this.complete_video 
+    }
+
+    getID() { // returns the video id
+        return this.videoFileUUID;
+    }
+
+    getBlob() { // returns the blobs
+        return this.blobs;
+    }
+
+    getPostId() { // returns the post id
         return this.data.p
     }
-    isDone = () => this.isDone
+
 }
 
 class BlobVideo {

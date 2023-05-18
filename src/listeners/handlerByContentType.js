@@ -40,7 +40,7 @@ let trafficHandlers = {
     },
     'image/jpeg': {
         request: null, //handleImageRequest,
-        response: null, //handleImageResponse
+        response: handleImageResponse,
     },
     'application/javascript': {
         request: null,

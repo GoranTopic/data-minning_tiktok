@@ -7,8 +7,14 @@ const handleVideoResponse = async response => {
     let request = response.request();
     // get the request url
     parsed['url'] = request.url();
-    // get the video Buffer
-    let video = await response.body();
+    // try to get the video Buffer
+    let video;
+    try{
+        video = await response.body();
+    }catch(e){
+        console.error(e)
+        return { error: e, type: 'error' };
+    }
     // get the video
     parsed['video'] = video;
     // get the headers 

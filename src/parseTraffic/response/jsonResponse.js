@@ -15,8 +15,6 @@ const handleJsonReponse = async response => {
     let authors = [];
     let videos = [];
     let musicList = [];
-    console.log(json.itemList)
-    console.log(json.itemList.length)
     // for each post on the itemList
     json.itemList.forEach(post => {
         // if the post has a video

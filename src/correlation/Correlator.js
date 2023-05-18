@@ -10,6 +10,22 @@ import Comment from './dataTypes/Comment.js'
 import Music from './dataTypes/Music.js'
 import Place from './dataTypes/Place.js'
 
+// initialize the databases
+console.log(`[Correlator] initializing databases...`)
+let dbs = { 
+    authors: await KeyValueStore.open('authors'),
+    posts: await KeyValueStore.open('posts'),
+    videos: await KeyValueStore.open('videos'),
+    videos_files: await KeyValueStore.open('videos_files'),
+    images: await KeyValueStore.open('images'),
+    images_files: await KeyValueStore.open('images_files'),
+    blob_videos: await KeyValueStore.open('blob_videos'),
+    challenges: await KeyValueStore.open('challenges'),
+    comments: await KeyValueStore.open('comments'),
+    musics: await KeyValueStore.open('musics'),
+    places: await KeyValueStore.open('places'),
+}
+
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
 // called corraltor, it has an empty constructor.
@@ -17,19 +33,8 @@ import Place from './dataTypes/Place.js'
 // every time it draws relationships between them and ouput the map of the relationships
 class Correlator {
     constructor() {
-        (async () => {
-            this.dbs = { 
-                authors: await KeyValueStore.open('authors'),
-                posts: await KeyValueStore.open('posts'),
-                images: await KeyValueStore.open('images'),
-                videos: await KeyValueStore.open('videos'),
-                blob_videos: await KeyValueStore.open('blob_videos'),
-                challenges: await KeyValueStore.open('challenges'),
-                comments: await KeyValueStore.open('comments'),
-                musics: await KeyValueStore.open('musics'),
-                places: await KeyValueStore.open('places'),
-            }
-        })();
+        // this ge the databses
+        this.dbs = dbs;
         // this is an array to hold the objects
         this.arrays = {
             authors: [],
@@ -97,7 +102,6 @@ class Correlator {
                     console.error(`unknown type ${type}`)
             }
         }else{
-            // console.log(`adding data to correlator`)
             if(authors)
                 for(let author of authors)
                     await this.addAuthor(author)
@@ -119,7 +123,7 @@ class Correlator {
         // if author already exists, update it
         let a = await this._checkIDAndUpdateData( 'authors', author_data, Author )
         // add the binary urls to expect
-        //this._extractBinarysUrlsToExpect( a );
+        this._extractBinarysUrlsToExpect( a );
         // add the the arrays
         this.arrays['authors'].push( a )
         // save the author
@@ -134,7 +138,7 @@ class Correlator {
         // add the the internal array
         this.arrays['posts'].push( p )
         // add the binary urls to expect
-        //this._extractBinarysUrlsToExpect( p );
+        this._extractBinarysUrlsToExpect( p );
         // save the post
         await this.dbs['posts'].setValue( p.id, p.toObj() )
     }
@@ -142,8 +146,21 @@ class Correlator {
     // add image and correlate
     addImage = async image_data => {
         // make an image object 
-        let i = new Image( image_data )
-        //await this.dbs['images'].setValue( image.id, image )
+        let match = this.binariesToExpect[image_data.url];
+        // check if the image is expected
+        if(match){  
+            // make an image obj
+            let image = new Image( image_data )
+            console.log(`image ${image_data.url} is matched`)
+            let path = match.path;
+            let type = match.type + 's';
+            let obj = match.dataObj.data;
+            this._writeInPath( obj, path, image.id );
+            // save the blob image to the db
+            this.dbs['images_files'].setValue( image.id, image.image, {  contentType: 'Buffer' } );
+            // save obj to the db
+            this.dbs[type].setValue( obj.id, obj.data )
+        }
     }
 
     // add video and correalte
@@ -158,18 +175,6 @@ class Correlator {
         v = await this._checkIDAndUpdateData( 'videos', video_data, Video )
         // save the video in the db
         await this.dbs['videos'].setValue( v.id, v.toObj() )
-        /*
-        console.log('binaries to expect:', 
-            Object.keys(this.binariesToExpect)
-            .map( url => { 
-                let mapped = {};
-                let url_id = get_video_id_from_url(url);
-                let post = this.binariesToExpect[url].data.bitrateInfo[1];
-                mapped[url_id] = post
-                return { ...mapped }
-            })
-        )
-        */
     }
 
     // correlate video with binary data
@@ -177,13 +182,21 @@ class Correlator {
         // print this binaries to expect
         let url = blob_video_data.url;
         // check if it is correlated to a video
-        let video = this.binariesToExpect[url].dataObj;
-        if(video) // add make blob obj to the video
+        let match = this.binariesToExpect[url];
+        // check if the video is correlated
+        if(match){  
+            // add make blob obj to the video
+            let video = match.dataObj;
             video.addBlob( new BlobVideo(blob_video_data) );
-        else{
-            let video_id = get_video_id_from_url(blob_video_data.url);
-            console.log(`blob video ${video_id} could not be correlated`)
-        }
+            // save the blob video to the db
+            if(video.isDone){
+                let bin = video.getBinary();
+                let id = video.getID();
+                await this.dbs['videos_files'].setValue( id, bin, {  contentType: 'Buffer' } );
+                await this.dbs['videos'].setValue( video.id, video.toObj() )
+            }
+        }else
+            console.error(`blob video ${get_video_id_from_url(url)} could not be correlated`)
     }
 
     // add comment and correlate
@@ -226,14 +239,13 @@ class Correlator {
      * @return {Object} - the object that was created or updated based on the passed class
      * check if the id exists in the database, if it does, update it, if not, create a new one
      */
-    _checkIDAndUpdateData = async (type, data , Class) => {
+    _checkIDAndUpdateData = async (type, data, Class) => {
         let d;
         let id = data.id;
         // if author already exists, update it
         let previous_record = await this.dbs[type].getValue( id );
         if( previous_record ){
             d = new Class( previous_record )
-            console.log('updating previous_record, ', previous_record.id + ' with ' + data.id);
             d.update( data )
         }else // else create a new author
             d = new Class( data )
@@ -245,6 +257,7 @@ class Correlator {
      */
     _extractBinarysUrlsToExpect = dataObj => {
         let data = dataObj.toObj();
+        let type = dataObj.constructor.name.toLowerCase();
         /* this function takes an object and returns an array of all of the urls in the object */
         let _findUrlsValues = (obj, path = '', results = []) => {
             const urlRegexPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(:\d{2,5})?(\/\S*)?$/i;
@@ -263,8 +276,25 @@ class Correlator {
         let urls = _findUrlsValues(data);
         // add url to expected binary data
         urls.forEach( 
-            url => this.binariesToExpect[url.value] = { path: url.path, dataObj }
+            url => this.binariesToExpect[url.value] = { path: url.path, dataObj, type }
         );
+    }
+    
+    _writeInPath = (obj, path, value) => {
+        //console.log(obj)
+        let path_array = path.split('.');
+        //console.log(path_array)
+        // get the first part of the path
+        let last = path_array.pop();
+        //console.log(last)
+        let current = obj;
+        path_array.forEach( key => {
+            console.log(key)
+            console.log(current)
+            console.log(current[key])
+            current = current[key]
+        })
+        current[last] = value;
     }
 }
 
