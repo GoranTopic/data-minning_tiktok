@@ -3,6 +3,7 @@ import { firefox } from 'playwright';
 import prompt_sync from 'prompt-sync';
 //import extra_stealth from 'puppeteer-extra-plugin-stealth'
 import setListeners from './listeners/setListeners.js';
+// import the sript to handle
 //import the correlator
 import correlator from './correlation/Correlator.js';
 // create a prompt
