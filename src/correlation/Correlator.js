@@ -151,7 +151,6 @@ class Correlator {
         if(match){  
             // make an image obj
             let image = new Image( image_data )
-            console.log(`image ${image_data.url} is matched`)
             let path = match.path;
             let type = match.type + 's';
             let obj = match.dataObj.data;
@@ -159,7 +158,7 @@ class Correlator {
             // save the blob image to the db
             this.dbs['images_files'].setValue( image.id, image.image, {  contentType: 'Buffer' } );
             // save obj to the db
-            this.dbs[type].setValue( obj.id, obj.data )
+            this.dbs[type].setValue( obj.id, obj )
         }
     }
 
@@ -281,19 +280,17 @@ class Correlator {
     }
     
     _writeInPath = (obj, path, value) => {
-        //console.log(obj)
+        // split the path into an array
         let path_array = path.split('.');
-        //console.log(path_array)
         // get the first part of the path
         let last = path_array.pop();
-        //console.log(last)
+        // get the object that
         let current = obj;
+        // get the object that contains the path
         path_array.forEach( key => {
-            console.log(key)
-            console.log(current)
-            console.log(current[key])
             current = current[key]
         })
+        // set the value
         current[last] = value;
     }
 }
