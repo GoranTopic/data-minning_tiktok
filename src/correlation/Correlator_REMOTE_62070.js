@@ -25,7 +25,6 @@ let dbs = {
     musics: await KeyValueStore.open('musics'),
     places: await KeyValueStore.open('places'),
 }
-console.log(`[Correlator] done` )
 
 // make a class that keeps track of the correlation between traffic, the intecepted reuqest and responces 
 // it takes in the request from the traffic, and it takes a response
@@ -152,16 +151,9 @@ class Correlator {
         if(match){  
             // make an image obj
             let image = new Image( image_data )
-<<<<<<< HEAD
-            //  get the path and type of the object
-=======
->>>>>>> listeners
             let path = match.path;
-            // get the type of the object
             let type = match.type + 's';
-            // get the object
             let obj = match.dataObj.data;
-            // add the image to the object
             this._writeInPath( obj, path, image.id );
             // save the blob image to the db
             this.dbs['images_files'].setValue( image.id, image.image, {  contentType: 'Buffer' } );
@@ -290,16 +282,6 @@ class Correlator {
     _writeInPath = (obj, path, value) => {
         // split the path into an array
         let path_array = path.split('.');
-<<<<<<< HEAD
-        //  get the last key
-        let last = path_array.pop();
-        // get the object at the path
-        let current = obj;
-        // get the object at the path
-        path_array.forEach( key => 
-            current = current[key]
-        )
-=======
         // get the first part of the path
         let last = path_array.pop();
         // get the object that
@@ -308,7 +290,6 @@ class Correlator {
         path_array.forEach( key => {
             current = current[key]
         })
->>>>>>> listeners
         // set the value
         current[last] = value;
     }
