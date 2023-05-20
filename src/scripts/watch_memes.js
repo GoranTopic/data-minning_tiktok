@@ -5,7 +5,7 @@ const videoDuration = 5000; // Duration in milliseconds to watch each video
 let previousHeight = 0;
 
 const watch_videos = async page => {
-    let count = 10;
+    let count = 100;
     let current = 0;
     while (current < count) {
         // Find all elemsnts with the class of data-e2e="recommend-list-item-container"
