@@ -8,6 +8,7 @@ const handleJsonReponse = async response => {
     if( !url.includes('api') ) return;
     // get the response
     const json = await response.json();
+    console.log('json', json);
     // if it has a ItemList
     if( !json.itemList ) return 
     // let parse the data
@@ -40,6 +41,7 @@ const handleJsonReponse = async response => {
         // push the music
         musicList.push(music);
     });
+    console.log('posts', posts);
     // return the data
     return { posts, authors, videos, music: musicList };
 }
