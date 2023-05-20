@@ -5,10 +5,7 @@ import prompt_sync from 'prompt-sync';
 import watch_memes from './scripts/watch_memes.js';
 import closePopup from './scripts/close_pop_up.js';
 //import extra_stealth from 'puppeteer-extra-plugin-stealth'
-import setListeners from './listeners/setListeners.js';
-// import the sript to handle
-//import the correlator
-import correlator from './correlation/Correlator.js';
+import setRouters from './routes/setRoutes.js';
 // create a prompt
 let prompt = prompt_sync();
 // add stealth plugin and use defaults (all evasion techniques)
@@ -27,8 +24,8 @@ const browser = await firefox.launch({
 
 // create a new page
 const page = await browser.newPage();
-// set listener for requests and responses
-await setListeners(page);
+// set routes to intercept requests and responses
+await setRouters(page);
 // go to the domain
 await page.goto(domain);
 // wait for the page to load

@@ -1,12 +1,14 @@
 // handle images
 const handleImage = async response => {
     let parsed = {};
-    // wait for the response to finish
-    await response.finished();
-    // get the response 
-    let request = response.request();
+    // wait for the response to finish if we can
+    if( response.finished ) await response.finished();
+    // get url form the request if we can
+    let url = (response.request)? 
+        await response.request().url() :
+        response.url();
     // get the request url
-    parsed['url'] = request.url();
+    parsed['url'] = url;
     //  get the headers
     let headers = response.headers();
     //if( headers ) console.log('image headers: ', headers);
