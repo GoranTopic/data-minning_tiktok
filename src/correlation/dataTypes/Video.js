@@ -1,5 +1,6 @@
 import DataType from "./DataType.js";
 import { v4 as uuidv4 } from 'uuid';
+import video_id_from_url from '../../utils/get_video_id_from_url.js';
 
 class Video extends DataType {
     constructor(video) {
@@ -20,9 +21,11 @@ class Video extends DataType {
 
     addBlob(blob) {
         this.blobs.push(blob);
-        //console.log('adding blob to video', this.data.postDesc, " from ", this.data.authorName);
-        //console.log('video size: ', this.size);
-        //console.log('start', blob.start, 'end', blob.end, 'length', blob.length);
+        console.log('adding blob to video from ', this.data.authorName, 'with description', this.data.postDesc); 
+        console.log('video size: ', this.size);
+        console.log('blob id', video_id_from_url(blob.url));
+        console.log('blob.start', blob.start, 'blob.end', blob.end, 'blob.length', blob.length);
+        console.log()
         // check that it is done
         this.isDone = true;
         // add the blobs together so that it make a choerent video

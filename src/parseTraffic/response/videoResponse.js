@@ -1,19 +1,33 @@
+import get_video_id_with_url from '../../utils/get_video_id_from_url.js';
+
 // handle videos
 const handleVideoResponse = async response => {
+    console.log('videoResponse.js: was called')
     let parsed = {};
-    // wait for the response to finish
-    await response.finished();
-    // get the video
+       // get the video
     let request = response.request();
     // get the request url
     parsed['url'] = request.url();
+    // debugging
+    //console.log('video response in videoResponse.js')
+    console.log('videoResponse.js: ', get_video_id_with_url(request.url()))
+    //console.log('url:', request.url())
     // try to get the video Buffer
+    debugger;
     let video;
     try{
         video = await response.body();
     }catch(e){
+        // wait for the response to finish
         console.error(e)
-        return { error: e, type: 'error' };
+        console.log('status: ', await response.status());
+        console.log('ok: ', response.ok());
+        console.log('text: ', await response.text());
+        console.log('await response finished:')
+        await response.finished()
+        console.log('finished')
+        video = await response.body();
+        //return { error: e, type: 'error' };
     }
     // get the video
     parsed['video'] = video;

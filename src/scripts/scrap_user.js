@@ -1,12 +1,8 @@
 import correlator from '../correlation/Correlator.js';
 
-// Scroll and watch videos dynamically
-const videoDuration = 5000; // Duration in milliseconds to watch each video
-let previousHeight = 0;
 
-const watch_videos = async page => {
-    let count = 10;
-    let current = 0;
+const scrap_user = async (page, user) => {
+
     while (current < count) {
         // Find all elemsnts with the class of data-e2e="recommend-list-item-container"
         const videos = await page.$$('div[data-e2e="recommend-list-item-container"]');

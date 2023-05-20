@@ -3,6 +3,7 @@ import { firefox } from 'playwright';
 import prompt_sync from 'prompt-sync';
 // import the scripts to follow
 import watch_memes from './scripts/watch_memes.js';
+import closePopup from './scripts/close_pop_up.js';
 //import extra_stealth from 'puppeteer-extra-plugin-stealth'
 import setListeners from './listeners/setListeners.js';
 // import the sript to handle
@@ -32,7 +33,13 @@ await setListeners(page);
 await page.goto(domain);
 // wait for the page to load
 await page.waitForLoadState('networkidle', { timeout: 1000 * 60 * 60 * 5 });
+// close the popup
+await closePopup(page);
 // scroll down
-//await page.mouse.wheel(0, 100);
+await watch_memes(page);
+// lets scrap the user 
+//@pelaofili298
+//await scrap_user(page, 'pelaofili298');
+
 
 

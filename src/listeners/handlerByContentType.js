@@ -64,7 +64,7 @@ const handlerResponseByContentType = async response => {
     let resourceType = getResourceType(request);
     // get the content type
     let contentType = getContentType(response);
-    // data to parse
+    
     //console.log('contentType', contentType)
     let data = {}
     // if there is a correlator for the content type
@@ -72,16 +72,12 @@ const handlerResponseByContentType = async response => {
         // get handlers 
         let requestHandler = trafficHandlers[contentType]['request']
         let responseHandler = trafficHandlers[contentType]['response']
-        // get correlator
-        let correlatorHandler = correlator[contentType]
         // if there is a request handler
-        if (requestHandler)  data = { ...data, ...( await requestHandler(request) ) }
+        //if (requestHandler)  data = { ...data, ...( await requestHandler(request) ) }
         // if there is a response handler
         if (responseHandler) data = { ...data, ...( await responseHandler(response) ) }
         //console.log('data', data)
-    }
-    //else 
-    //  console.error('no correlator for ' + contentType)
+    } //else console.error('no correlator for ' + contentType)
     // if thre was data parsed, correlate
     // if data is not an empty object
     if (Object.keys(data).length !== 0)
