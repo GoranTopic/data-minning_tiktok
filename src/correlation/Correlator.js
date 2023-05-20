@@ -287,75 +287,19 @@ class Correlator {
     _writeInPath = (obj, path, value) => {
         // split the path into an array
         let path_array = path.split('.');
-        //  get the last key
+        // get the first part of the path
         let last = path_array.pop();
-        // get the object at the path
+        // get the object that
         let current = obj;
-        // get the object at the path
-        path_array.forEach( key => 
+        // get the object that contains the path
+        path_array.forEach( key => {
             current = current[key]
-        )
+        })
         // set the value
         current[last] = value;
     }
 }
-
-    /*
-        // html handlers
-    json(request, response) {
-        // get json
-        // if json does not have itemList, dont save it
-        let new_json_posts = []
-        // check if the json has an itemList array
-        if( !json.itemList ) return;
-        // let get all the items and added them to the items object
-        json.itemList.forEach( item =>
-            new_json_posts.push( this._parse_post(item) )
-        )
-        // add them to the global posts
-        new_json_posts.forEach( post => this.posts.push(post) )
-        console.log(`json posts added: ${new_json_posts.length}`)
-        console.log(`total posts added: ${this.posts.length}`)
-    }
-// js handlers
-    js(request, response) {
-    }
-// image handlers
-    image(request, response) {
-    }
-// video handlers
-    video(request, response) {
-        // remove the cache from the video url
-            }
-// this funtion takes a post which may not be structured as the same 
-// and return a post with the same structure
-    _parse_post(post) {
-        return {
-            author: { 
-                author: post.author?.uniqueId ? post.author.uniqueId : post.author,
-                id: post.author?.id? post.author.id : post.authorId,
-                nickname: post.author?.nickname? post.author.nickname : post.nickname,
-            },
-            description: post.desc,
-            video: {
-                size: post.video.size,
-                id: post.video.id,
-                playAddr: post.video.playAddr,
-                downloadAddr: post.video.downloadAddr,
-                bitrateUrls: post.video.bitrateInfo[0].PlayAddr.UrlList
-            },
-            files: { // this is where the files will be stored
-                video: {
-                    size: 0,
-                    playAddr: null,
-                    downloadAddr: null,
-                    bitrateUrls: [],
-                }
-            },
-        }
-    }
-    */
-
+    
 // make and instance of the correlator
 const correlator = new Correlator();
 
