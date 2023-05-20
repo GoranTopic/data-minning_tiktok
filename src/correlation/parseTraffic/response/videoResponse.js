@@ -15,14 +15,13 @@ const handleVideoResponse = async response => {
     }catch(e){
         // wait for the response to finish
         console.error(e)
-        console.log('status: ', await response.status());
-        console.log('ok: ', response.ok());
-        console.log('text: ', await response.text());
-        console.log('await response finished:')
-        await response.finished()
-        console.log('finished')
-        video = await response.body();
-        //return { error: e, type: 'error' };
+        //console.log('status: ', await response.status());
+        //console.log('ok: ', response.ok());
+        //console.log('await response finished:')
+        //await response.finished()
+        //console.log('finished')
+        //video = await response.body();
+        return { error: e, type: 'error' };
     }
     // get the video
     parsed['video'] = video;

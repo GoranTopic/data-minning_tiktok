@@ -54,7 +54,7 @@ let trafficHandlers = {
 // then it calls the correlator
 const handlerResponseByContentType = async ({ response, request }) => {
     // if the response is not passed, get the request from the respose
-    if (!request) request = await response.request();
+    if (!request && response.request) request = await response.request();
     // get the url
     //let url = route.request().url()
     // get the resource type

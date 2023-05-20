@@ -8,9 +8,9 @@ const handleJsonReponse = async response => {
     if( !url.includes('api') ) return;
     // get the response
     const json = await response.json();
-    console.log('json', json);
     // if it has a ItemList
     if( !json.itemList ) return 
+    console.log('got json itemList', json.itemList.length);
     // let parse the data
     let posts = [];
     let authors = [];
