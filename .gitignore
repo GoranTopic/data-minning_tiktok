@@ -1,3 +1,3 @@
 # .gitignore for node.js projects
 node_modules
-storage
+storage*/
