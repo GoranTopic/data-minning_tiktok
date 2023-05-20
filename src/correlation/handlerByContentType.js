@@ -1,20 +1,16 @@
 //import fs from 'fs';
-import getResourceType from '../parseTraffic/request/getResourceType.js';
-import getContentType from '../parseTraffic/response/getContentType.js';
+import getResourceType from './parseTraffic/request/getResourceType.js';
+import getContentType from './parseTraffic/response/getContentType.js';
 // html handlers
-import handleHtmlRequest from '../parseTraffic/request/htmlRequest.js'; 
-import handleHtmlResponse from '../parseTraffic/response/htmlResponse.js';
+import handleHtmlResponse from './parseTraffic/response/htmlResponse.js';
 // json handlers
-import handleJsonRequest from '../parseTraffic/request/jsonRequest.js';
-import handleJsonResponse from '../parseTraffic/response/jsonResponse.js';
+import handleJsonResponse from './parseTraffic/response/jsonResponse.js';
 // video handlers
-import handleVideoRequest from '../parseTraffic/request/videoRequest.js';
-import handleVideoResponse from '../parseTraffic/response/videoResponse.js';
+import handleVideoResponse from './parseTraffic/response/videoResponse.js';
 // image handlers
-import handleImageRequest from '../parseTraffic/request/imageRequest.js';
-import handleImageResponse from '../parseTraffic/response/imageResponse.js';
+import handleImageResponse from './parseTraffic/response/imageResponse.js';
 // correlator
-import correlator from '../correlation/Correlator.js';
+import correlator from './Correlator.js';
 
 // correlate based on content type
 let trafficHandlers = {
