@@ -1,4 +1,4 @@
-import get_video_id_with_url from '../../utils/get_video_id_from_url.js';
+import get_video_id_with_url from '../../../utils/get_video_id_from_url.js';
 
 // handle videos
 const handleVideoResponse = async response => {
