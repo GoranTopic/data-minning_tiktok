@@ -8,7 +8,7 @@ let domain = 'https://www.tiktok.com';
 // Scroll and watch dank tiktok memes
 const watch_videos = async page => {
     // Go to the dank memes page
-    await page.goto(`${domain}/tag/dankmemes`, { waitUntil: 'networkidle' });
+    await page.goto(`${domain}`, { waitUntil: 'networkidle' });
     // Wait for the page to load
     await page.waitForTimeout(shortTime());
     // Close the popup

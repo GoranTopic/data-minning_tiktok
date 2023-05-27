@@ -1,5 +1,4 @@
-//import { firefox } from 'playwright-extra';
-import { firefox } from 'playwright';
+import { firefox } from 'playwright-extra';
 import prompt_sync from 'prompt-sync';
 // import the scripts to follow
 import watch_memes from './scripts/watch_memes.js';
@@ -10,11 +9,8 @@ import scrap_hashtag from './scripts/scrap_hashtag.js';
 import setListeners from './listeners/setListeners.js';
 // import routes
 import setRouters from './routes/setRoutes.js';
-// create a prompt
-let prompt = prompt_sync();
 // add stealth plugin and use defaults (all evasion techniques)
 //firefox.use(extra_stealth())
-import fs from 'fs';
 
 // domain
 let domain = 'https://www.tiktok.com/';
@@ -36,8 +32,6 @@ await setListeners(page);
 await page.waitForLoadState('networkidle', { timeout: 1000 * 60 * 60 * 5 });
 // scroll down
 //await watch_memes(page);
-// got to the domain
-//await page.goto(domain);
 // lets scrap the user 
 // some users to test agaist
 let users_example = [ 'pelaofili298', 'tucarla15', 'loveney_mar' ];
@@ -47,3 +41,5 @@ await scrap_user(page, users_example[0]);
 let hashtags_example = [ 'movies' ];
 // scrap the hashtag
 //await scrap_hashtag(page, hashtags_example[0]);
+// got to the domain
+//await page.goto(domain);
