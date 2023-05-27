@@ -12,15 +12,18 @@ import setRouters from './routes/setRoutes.js';
 // add stealth plugin and use defaults (all evasion techniques)
 //firefox.use(extra_stealth())
 
+const launchOptions = {
+    headless: false,
+    proxy: {
+        server: '222.165.235.2:80'
+    }
+};
+
 // domain
 let domain = 'https://www.tiktok.com/';
 
 // browser
-const browser = await firefox.launch({
-    headless: false,
-    // open devtools
-    //devtools: true,
-});
+const browser = await firefox.launch(browserOptions);
 
 // create a new page
 const page = await browser.newPage();
