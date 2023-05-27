@@ -115,6 +115,9 @@ class Correlator {
             if(videos)
                 for(let video of videos)
                     await this.addVideo(video)
+            if(comments)
+                for(let comment of comments)
+                    await this.addComment(comment)
         }
     }
 

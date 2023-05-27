@@ -1,25 +1,42 @@
 // handle html code
 const handleHtmlResponse = async response => {
-    try {
-        // get the text as a response
-        let html_src = await response.text();
-        // get the past of the hmlt string that has the json obj
-        let json_str = html_src
-            ?.split('<script id="SIGI_STATE" type="application/json">')[1]
-            ?.split('</script>')[0];
-        // parse the json obj
-        let json = JSON.parse(json_str);
-        //console.log(json.ItemList);
-        let posts_ids = json.ItemList.foryou.list;
-        // get post for each id
-        let posts = posts_ids.map(id => json.ItemModule[id]);
-        // extract data
-        let authors = [];
-        let videos = [];
-        let music = [];
-        let challenges = [];
-        // for every post
-        posts.forEach(post => {
+    // get the text as a response
+    let html_src = await response.text();
+    // get all the scripts open tags
+    let jsons = extract_json_objs(html_src);
+    // get the json that has the AppContext
+    jsons = filter_jsons(jsons);
+    // parse the data from the jsons
+    let data = parse_data_from_jsons(jsons);
+    // return the data
+    return data;
+};
+
+// parse the data from the jsons
+const parse_data_from_jsons = jsons => {
+    //  data to extract
+    let posts = [];
+    let authors = [];
+    let videos = [];
+    let music = [];
+    let challenges = [];
+    // for every json file
+    jsons.forEach(json => {
+        // get the posts ids
+        // if there is a ItemList
+        let AppContext = json?.AppContext;
+        let itemsList = json?.ItemList;
+        let itemModule = json?.ItemModule;
+        // get item list key 
+        let itemListKeys = Object.keys(itemsList);
+        let moduleItemIds = []
+        // for each key 
+        for(let key of itemListKeys) // add all the keys to the itemList
+            moduleItemIds = [...moduleItemIds, ...itemsList[key].list ];
+        // get the module items keys
+        let modules = moduleItemIds.map(id => itemModule[id]);
+        // for every module
+        modules.forEach( post => {
             // get the author
             let author = {
                 author: post.author,
@@ -70,39 +87,54 @@ const handleHtmlResponse = async response => {
             post.challenges = challenges_l.map(challenge => challenge.id);
             // save the challenges
             challenges_l.forEach(challenge => challenges.push(challenge));
+            // save the posts
+            posts.push(post);
         });
-        // return the parsed data
-        return {
-            authors,
-            videos,
-            music,
-            challenges,
-            posts,
-        };
-    } catch (error) {
-        // catch type error
-        console.log(error);
-        // check if error is type error return 
-        if (error instanceof TypeError) {
-            let html_src = await response.text();
-            // get the past of the hmlt string that has the json obj
-            let json_str = html_src
-                ?.split('<script id="SIGI_STATE" type="application/json">')[1]
-                ?.split('</script>')[0];
-            // parse the json obj
-            let json = JSON.parse(json_str);
-            console.log(json);
-        }
-        // check if error is syntax error
-        if (error instanceof SyntaxError) {
-            // get the text as a response
-            let html_src = await response.text();
-            // get the past of the hmlt string that has the json obj
-            console.log(html_src);
+    });
+    // return the parsed data
+    return {
+        authors,
+        videos,
+        music,
+        challenges,
+        posts,
+    };
+}
+
+
+// get all the jsons that have the AppContext or ItemModule
+const filter_jsons = jsons => {
+    // now let filter them if they dont have the AppContext
+    return jsons?.filter( json =>
+        json?.AppContext || 
+        json?.ItemModule ||
+        json?.ItemList?.foryou?.list
+    )
+}
+
+// get all json application scripts from html
+const extract_json_objs = html_src => {
+    // get all the scripts open tags
+    let open_tags = html_src
+        ?.split('<script');
+    // filter all the tags that have the json application type
+    open_tags = open_tags
+        ?.filter(tag => tag.includes('type="application/json">'))
+        ?.map(tag => tag.split('type="application/json">')[1]);
+    // match until the close tag
+    let contentJson = open_tags
+        ?.map(tag => tag.split('</script>')[0]);
+    // for every json file
+    let jsons = contentJson?.map(json => {
+        try{
+            let json_obj = JSON.parse(json);
+            return json_obj;
+        } catch (error) {
             console.error(error);
         }
-
-    }
-};
+    });
+    // return the jsons
+    return jsons;
+}
 
 export default handleHtmlResponse;

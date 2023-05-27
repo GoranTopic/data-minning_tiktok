@@ -1,10 +1,19 @@
 import correlator from '../correlation/Correlator.js';
+import closePopup from './close_pop_up.js';
+import { shortTime } from '../utils/timers.js'
 
-// Scroll and watch videos dynamically
-const videoDuration = 5000; // Duration in milliseconds to watch each video
-let previousHeight = 0;
+// domain
+let domain = 'https://www.tiktok.com';
 
+// Scroll and watch dank tiktok memes
 const watch_videos = async page => {
+    // Go to the dank memes page
+    await page.goto(`${domain}/tag/dankmemes`, { waitUntil: 'networkidle' });
+    // Wait for the page to load
+    await page.waitForTimeout(shortTime());
+    // Close the popup
+    await closePopup(page);
+    // Scroll and watch videos
     let count = 100;
     let current = 0;
     while (current < count) {
@@ -16,7 +25,8 @@ const watch_videos = async page => {
         // press arrow down key
         await page.keyboard.press('ArrowDown');
         // wait a while
-        await page.waitForTimeout(10000);
+        console.log(`wating for, ${shortTime()}ms`);
+        await page.waitForTimeout(shortTime());
         // current 
         current++;
     }
